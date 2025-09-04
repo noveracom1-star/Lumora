@@ -16,535 +16,157 @@
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
 
   <style>
-    :root {
-      --primary-gradient: linear-gradient(135deg, #4776E6 0%, #8E54E9 100%);
-      --user-message-bg: linear-gradient(135deg, #4776E6 0%, #5A87FF 100%);
-      --bot-message-bg: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
-      --dark-text: #2D3748;
-      --light-text: #FFFFFF;
-      --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-      --container-bg: #FFFFFF;
-      --accent-color: #8E54E9;
+    :root{
+      --bg:#0f1724; --card:#0b1220; --glass: rgba(255,255,255,0.04);
+      --accent1: #6e48aa; --accent2:#4776E6; --muted:#94a3b8; --white: #e6eef8;
+      --success:#10b981; --danger:#ef4444; --shadow: 0 10px 30px rgba(2,6,23,0.6);
+      --radius:14px;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%}
+    body{
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background: linear-gradient(180deg,#071024 0%, #07182b 60%);
+      color:var(--white);
+      -webkit-font-smoothing:antialiased;
+      display:flex;flex-direction:column;min-height:100vh;
     }
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      transition: background-color 0.3s ease;
-    }
+    /* Top bar */
+    header{display:flex;align-items:center;justify-content:space-between;padding:18px 28px;background:transparent}
+    .brand{display:flex;gap:12px;align-items:center}
+    .brand .logo{width:46px;height:46px;border-radius:10px;background:linear-gradient(135deg,var(--accent2),var(--accent1));display:flex;align-items:center;justify-content:center;font-weight:800;box-shadow:0 8px 30px rgba(78,52,175,0.25)}
+    .brand h1{font-size:18px;letter-spacing:0.6px}
 
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: #f8fafc;
-      color: var(--dark-text);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
+    .top-actions{display:flex;gap:10px;align-items:center}
+    .btn{padding:10px 14px;border-radius:10px;border:none;cursor:pointer;font-weight:600}
+    .btn-primary{background:linear-gradient(90deg,var(--accent2),var(--accent1));color:white;box-shadow:var(--shadow)}
+    .btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--white)}
 
-    /* Loading Screen */
-    #loading-screen {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: var(--primary-gradient);
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;
-      transition: opacity 0.5s ease;
-    }
+    /* Layout */
+    .container{display:flex;gap:22px;max-width:1200px;margin:22px auto;flex:1;width:100%;padding:0 20px}
+    .sidebar{width:300px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);height:calc(100vh - 160px);overflow:auto}
+    .main{flex:1;display:flex;flex-direction:column;gap:18px}
 
-    .loading-logo {
-      width: 120px; height: 120px;
-      margin-bottom: 30px;
-      position: relative;
-    }
+    /* Chat card */
+    .chat-card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:var(--radius);padding:12px;box-shadow:var(--shadow);height:calc(100vh - 160px);display:flex;flex-direction:column}
+    .chat-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,0.03)}
+    .chat-header .left{display:flex;align-items:center;gap:12px}
+    .user-badge{background:transparent;border-radius:999px;padding:6px 12px;border:1px solid rgba(255,255,255,0.04);font-weight:600;color:var(--white)}
 
-    .logo-circle {
-      position: absolute;
-      width: 100%; height: 100%;
-      border: 3px solid rgba(255, 255, 255, 0.1);
-      border-top-color: white;
-      border-radius: 50%;
-      animation: spin 1.2s linear infinite;
-    }
+    .messages{flex:1;padding:20px;overflow:auto;display:flex;flex-direction:column;gap:14px}
+    .msg{max-width:70%;padding:12px 16px;border-radius:14px;line-height:1.45}
+    .msg.bot{background:linear-gradient(180deg,#0b1220,#0f1724);align-self:flex-start;border:1px solid rgba(255,255,255,0.03)}
+    .msg.user{background:linear-gradient(90deg,var(--accent2),var(--accent1));color:white;align-self:flex-end}
+    .time{display:block;font-size:12px;color:var(--muted);margin-top:8px;text-align:right}
 
-    .logo-inner {
-      position: absolute;
-      top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 2.5rem;
-      font-weight: bold;
-      color: white;
-    }
+    .input-area{padding:14px;border-top:1px solid rgba(255,255,255,0.03);display:flex;gap:10px;align-items:center}
+    .input{flex:1;padding:12px 14px;border-radius:12px;border:none;background:rgba(255,255,255,0.02);color:var(--white);outline:none}
+    .send{width:52px;height:52px;border-radius:12px;border:none;background:linear-gradient(90deg,var(--accent2),var(--accent1));display:flex;align-items:center;justify-content:center}
 
-    .loading-text {
-      color: white;
-      font-size: 1.2rem;
-      letter-spacing: 2px;
-    }
+    /* Sidebar items */
+    .sidebar h3{margin-bottom:12px;color:var(--muted);font-size:13px}
+    .history-item{padding:12px;border-radius:10px;background:transparent;border:1px solid rgba(255,255,255,0.02);margin-bottom:10px;cursor:pointer}
+    .history-item.active{background:linear-gradient(90deg,var(--accent2),var(--accent1));color:white}
 
-    .loading-progress {
-      width: 200px; height: 4px;
-      background: rgba(255, 255, 255, 0.2);
-      border-radius: 4px;
-      margin-top: 15px;
-      overflow: hidden;
-    }
+    /* Auth modal */
+    .modal-backdrop{position:fixed;inset:0;background:rgba(2,6,23,0.6);display:none;align-items:center;justify-content:center;z-index:10000}
+    .modal{width:380px;background:linear-gradient(180deg,#071124,#0b1220);padding:22px;border-radius:14px;border:1px solid rgba(255,255,255,0.03)}
+    .modal h2{margin-bottom:10px}
+    .field{margin-bottom:10px}
+    .field input{width:100%;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:var(--white)}
+    .small{font-size:13px;color:var(--muted)}
+    .link-like{color:var(--accent2);cursor:pointer}
 
-    .progress-bar {
-      height: 100%;
-      width: 0%;
-      background: white;
-      border-radius: 4px;
-      animation: loading 2s ease-in-out forwards;
-    }
+    /* Notification toast */
+    .toast{position:fixed;right:20px;bottom:24px;background:#061223;padding:12px 16px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);display:none}
 
-    @keyframes loading {
-      0% { width: 0%; } 100% { width: 100%; }
-    }
+    footer{padding:18px;text-align:center;color:var(--muted);font-size:13px}
 
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    header {
-      background: var(--primary-gradient);
-      color: white;
-      padding: 1.2rem;
-      box-shadow: var(--shadow);
-    }
-
-    .header-content {
-      max-width: 1200px;
-      margin: 0 auto;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .logo {
-      display: flex;
-      align-items: center;
-      font-size: 1.8rem;
-      font-weight: 700;
-    }
-
-    .logo i {
-      margin-right: 10px;
-    }
-
-    .nav-icons {
-      display: flex;
-      gap: 15px;
-    }
-
-    .nav-icons i {
-      font-size: 1.2rem;
-      cursor: pointer;
-      opacity: 0.8;
-    }
-
-    .nav-icons i:hover {
-      opacity: 1;
-    }
-
-    .main-container {
-      display: flex;
-      flex: 1;
-      max-width: 1400px;
-      margin: 0 auto;
-      width: 100%;
-      padding: 20px;
-      gap: 20px;
-    }
-
-    .sidebar {
-      width: 280px;
-      background: var(--container-bg);
-      border-radius: 16px;
-      box-shadow: var(--shadow);
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .sidebar-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 15px;
-    }
-
-    .new-chat-btn {
-      background: var(--primary-gradient);
-      color: white;
-      border: none;
-      border-radius: 20px;
-      padding: 8px 12px;
-      font-size: 0.9rem;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 5px;
-    }
-
-    .chat-history {
-      flex: 1;
-      overflow-y: auto;
-    }
-
-    .history-item {
-      padding: 12px 15px;
-      border-radius: 12px;
-      margin-bottom: 10px;
-      cursor: pointer;
-    }
-
-    .history-item:hover {
-      background: #F1F5F9;
-    }
-
-    .history-item.active {
-      background: var(--primary-gradient);
-      color: white;
-    }
-
-    .auth-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 70vh;
-      gap: 20px;
-      padding: 20px;
-    }
-
-    .auth-form {
-      background: white;
-      padding: 30px;
-      border-radius: 16px;
-      box-shadow: var(--shadow);
-      width: 100%;
-      max-width: 400px;
-    }
-
-    .auth-form h2 {
-      text-align: center;
-      margin-bottom: 20px;
-      color: var(--dark-text);
-    }
-
-    .auth-form input {
-      width: 100%;
-      padding: 12px 15px;
-      margin: 10px 0;
-      border: 1px solid #E2E8F0;
-      border-radius: 8px;
-      outline: none;
-    }
-
-    .auth-form input:focus {
-      border-color: #8E54E9;
-    }
-
-    .auth-btn {
-      width: 100%;
-      padding: 12px;
-      background: var(--primary-gradient);
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-size: 1rem;
-      margin-top: 10px;
-      cursor: pointer;
-    }
-
-    .switch-mode {
-      text-align: center;
-      margin-top: 15px;
-      color: #666;
-    }
-
-    .switch-mode a {
-      color: var(--accent-color);
-      cursor: pointer;
-    }
-
-    .verify-email {
-      background: #FEF3C7;
-      padding: 15px;
-      border-radius: 8px;
-      margin-bottom: 20px;
-      text-align: center;
-      font-size: 0.9rem;
-      color: #927404;
-    }
-
-    .chat-container {
-      flex: 1;
-      background: var(--container-bg);
-      border-radius: 16px;
-      box-shadow: var(--shadow);
-      display: flex;
-      flex-direction: column;
-      height: 75vh;
-      overflow: hidden;
-    }
-
-    .chat-header {
-      padding: 20px;
-      border-bottom: 1px solid #EDF2F7;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .chat-header i {
-      color: var(--accent-color);
-      margin-right: 10px;
-    }
-
-    .user-badge {
-      font-size: 0.8rem;
-      background: #E2E8F0;
-      padding: 4px 10px;
-      border-radius: 20px;
-    }
-
-    .chat-messages {
-      flex: 1;
-      padding: 20px;
-      overflow-y: auto;
-      background: #fafafa;
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-    }
-
-    .message {
-      max-width: 75%;
-      padding: 15px 20px;
-      border-radius: 18px;
-      position: relative;
-      line-height: 1.5;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    }
-
-    .user {
-      background: var(--user-message-bg);
-      color: white;
-      margin-left: auto;
-      border-bottom-right-radius: 5px;
-    }
-
-    .bot {
-      background: var(--bot-message-bg);
-      color: var(--dark-text);
-      margin-right: auto;
-      border-bottom-left-radius: 5px;
-    }
-
-    .message-time {
-      font-size: 0.7rem;
-      opacity: 0.7;
-      margin-top: 5px;
-      text-align: right;
-    }
-
-    .typing-indicator {
-      background: var(--bot-message-bg);
-      color: var(--dark-text);
-      padding: 15px 20px;
-      border-radius: 18px;
-      margin-right: auto;
-      border-bottom-left-radius: 5px;
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      max-width: 100px;
-    }
-
-    .typing-dot {
-      width: 8px;
-      height: 8px;
-      background: var(--accent-color);
-      border-radius: 50%;
-      display: inline-block;
-      animation: typingAnimation 1.4s infinite ease-in-out;
-    }
-
-    .typing-dot:nth-child(1) { animation-delay: 0s; }
-    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
-    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
-
-    @keyframes typingAnimation {
-      0%, 60%, 100% { transform: translateY(0); opacity: 0.6; }
-      30% { transform: translateY(-5px); opacity: 1; }
-    }
-
-    .chat-input-container {
-      padding: 20px;
-      border-top: 1px solid #EDF2F7;
-      background: white;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .input-actions {
-      display: flex;
-      gap: 10px;
-    }
-
-    .input-actions i {
-      font-size: 1.2rem;
-      color: #A0AEC0;
-      cursor: pointer;
-    }
-
-    .input-actions i:hover {
-      color: var(--accent-color);
-    }
-
-    .chat-input {
-      flex: 1;
-      padding: 15px 20px;
-      border: none;
-      background: #F7FAFC;
-      border-radius: 24px;
-      outline: none;
-      font-size: 1rem;
-    }
-
-    .chat-input:focus {
-      background: #EDF2F7;
-      box-shadow: 0 0 0 2px rgba(135, 96, 234, 0.2);
-    }
-
-    .send-btn {
-      background: var(--primary-gradient);
-      color: white;
-      border: none;
-      border-radius: 50%;
-      width: 50px;
-      height: 50px;
-      cursor: pointer;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      box-shadow: 0 4px 10px rgba(135, 96, 234, 0.3);
-    }
-
-    footer {
-      text-align: center;
-      padding: 20px;
-      color: #A0AEC0;
-      font-size: 0.9rem;
-      margin-top: auto;
-    }
-
-    @media (max-width: 900px) {
-      .main-container { flex-direction: column; }
-      .sidebar { width: 100%; }
-    }
-
-    .hidden { display: none !important; }
+    @media(max-width:900px){.container{flex-direction:column}.sidebar{width:100%;height:auto}.chat-card{height:calc(100vh - 220px)}}
   </style>
 </head>
 <body>
 
-  <!-- Loading Screen -->
-  <div id="loading-screen">
-    <div class="loading-logo">
-      <div class="logo-circle"></div>
-      <div class="logo-inner">L</div>
-    </div>
-    <div class="loading-text">LUMORA AI</div>
-    <div class="loading-progress">
-      <div class="progress-bar"></div>
-    </div>
-  </div>
-
-  <!-- Auth UI -->
-  <div id="auth-ui" class="auth-container">
-    <div class="auth-form">
-      <h2 id="auth-title">Register</h2>
-      <input type="text" id="name-input" placeholder="Full Name" />
-      <input type="email" id="email-input" placeholder="Email" />
-      <input type="password" id="password-input" placeholder="Password" />
-      <button class="auth-btn" id="auth-btn">Register</button>
-      <div class="switch-mode">
-        Already have an account? <a id="toggle-mode">Login</a>
+  <header>
+    <div class="brand">
+      <div class="logo">L</div>
+      <div>
+        <h1>LUMORA</h1>
+        <div class="small">Advanced AI Assistant</div>
       </div>
     </div>
-  </div>
 
-  <!-- Main App UI -->
-  <div id="app-ui" class="hidden">
-    <header>
-      <div class="header-content">
-        <div class="logo">
-          <i class="fas fa-brain"></i>
-          <span>LUMORA</span>
-        </div>
-        <div class="nav-icons">
-          <i class="fas fa-user-circle" id="profile-icon"></i>
-          <i class="fas fa-sign-out-alt" id="logout-btn"></i>
-        </div>
+    <div class="top-actions">
+      <button class="btn btn-ghost" id="btn-register">Register</button>
+      <button class="btn btn-primary" id="btn-login">Login</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <aside class="sidebar">
+      <h3>Chat History</h3>
+      <div id="chat-history">
+        <div class="history-item active">Today</div>
       </div>
-    </header>
+      <div style="height:12px"></div>
+      <div class="small">Tip: You can chat as a guest. Uploads and account features require login.</div>
+    </aside>
 
-    <div class="main-container">
-      <aside class="sidebar">
-        <div class="sidebar-header">
-          <h3>Chat History</h3>
-          <button class="new-chat-btn" id="new-chat-btn">
-            <i class="fas fa-plus"></i> New
-          </button>
-        </div>
-        <div class="chat-history" id="chat-history"></div>
-      </aside>
-
-      <div class="chat-container">
+    <section class="main">
+      <div class="chat-card" role="region" aria-label="Chat">
         <div class="chat-header">
-          <i class="fas fa-robot"></i>
-          <h2>LUMORA AI Assistant</h2>
-          <div class="user-badge" id="user-badge"></div>
-        </div>
-        <div class="chat-messages" id="chat-messages">
-          <div class="message bot">
-            👋 Hello! I'm LUMORA. How can I help you today?
-            <div class="message-time">Just now</div>
+          <div class="left">
+            <i class="fas fa-robot" style="font-size:20px;color:var(--accent2)"></i>
+            <div>
+              <div style="font-weight:700">LUMORA AI Assistant</div>
+              <div class="small">Fast, helpful and respectful</div>
+            </div>
+          </div>
+
+          <div>
+            <span class="user-badge" id="user-badge">Guest</span>
+            <button class="btn btn-ghost" id="logout-btn" style="margin-left:10px;display:none">Sign out</button>
           </div>
         </div>
-        <div class="chat-input-container">
-          <div class="input-actions">
-            <i class="fas fa-plus-circle" id="add-file-btn"></i>
-            <input type="file" id="file-input" class="hidden" />
-          </div>
-          <input type="text" id="chat-input" class="chat-input" placeholder="Type your message here..." />
-          <button class="send-btn" id="send-btn">
-            <i class="fas fa-paper-plane"></i>
-          </button>
+
+        <div class="messages" id="chat-messages">
+          <div class="msg bot">👋 Hello! I'm LUMORA. Start by typing your question below.<span class="time">Just now</span></div>
+        </div>
+
+        <div class="input-area">
+          <button class="btn btn-ghost" id="upload-btn" title="Upload files (login required)"><i class="fas fa-paperclip"></i></button>
+          <input class="input" id="chat-input" placeholder="Type your message here..." aria-label="Chat input" />
+          <button class="send" id="send-btn"><i class="fas fa-paper-plane"></i></button>
         </div>
       </div>
-    </div>
+    </section>
+  </main>
 
-    <footer>
-      <p>From AITECH by ANOINTING • Powered by Cohere AI • © 2023–2025 LUMORA</p>
-    </footer>
+  <footer>From AITECH by ANOINTING • Powered by Cohere AI • © 2023–2025 LUMORA</footer>
+
+  <!-- Auth Modal -->
+  <div class="modal-backdrop" id="modal-backdrop">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="auth-title">
+      <h2 id="auth-title">Login</h2>
+
+      <div id="auth-forms">
+        <!-- dynamic content inserted here -->
+      </div>
+
+      <div style="display:flex;justify-content:space-between;margin-top:10px">
+        <div class="small" id="auth-helper"></div>
+        <div><button class="btn btn-ghost" id="close-modal">Close</button></div>
+      </div>
+    </div>
   </div>
+
+  <div class="toast" id="toast"></div>
 
   <script>
-    // 🔐 Cohere API Key (Hardcoded - for testing only)
-    const COHERE_API_KEY = "NMGQyIAUHmb861NWLZW2iDHik3Vui8No6dLxj7Gs";
+    // --------- CONFIG ----------
+    const COHERE_API_KEY = "NMGQyIAUHmb861NWLZW2iDHik3Vui8No6dLxj7Gs"; // user-provided
 
-    // 🌐 Firebase Config (Your Project)
     const firebaseConfig = {
       apiKey: "AIzaSyBOwdgpt4PSo_MLMmz716zswPnpInaXfok",
       authDomain: "lumora-b227c.firebaseapp.com",
@@ -555,210 +177,232 @@
       measurementId: "G-83DKQ20SV8"
     };
 
-    // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
     const storage = firebase.storage();
 
-    // DOM Elements
-    const loadingScreen = document.getElementById('loading-screen');
-    const authUi = document.getElementById('auth-ui');
-    const appUi = document.getElementById('app-ui');
+    // --------- ELEMENTS ----------
+    const btnLogin = document.getElementById('btn-login');
+    const btnRegister = document.getElementById('btn-register');
+    const modalBackdrop = document.getElementById('modal-backdrop');
+    const authForms = document.getElementById('auth-forms');
     const authTitle = document.getElementById('auth-title');
-    const nameInput = document.getElementById('name-input');
-    const emailInput = document.getElementById('email-input');
-    const passwordInput = document.getElementById('password-input');
-    const authBtn = document.getElementById('auth-btn');
-    const toggleMode = document.getElementById('toggle-mode');
-    const logoutBtn = document.getElementById('logout-btn');
+    const closeModalBtn = document.getElementById('close-modal');
+    const toast = document.getElementById('toast');
+
     const userBadge = document.getElementById('user-badge');
+    const logoutBtn = document.getElementById('logout-btn');
+    const uploadBtn = document.getElementById('upload-btn');
+
     const chatMessages = document.getElementById('chat-messages');
     const chatInput = document.getElementById('chat-input');
     const sendBtn = document.getElementById('send-btn');
-    const newChatBtn = document.getElementById('new-chat-btn');
-    const addFileBtn = document.getElementById('add-file-btn');
-    const fileInput = document.getElementById('file-input');
-    const chatHistory = document.getElementById('chat-history');
 
-    let currentUser = null;
+    // --------- Helpers ----------
+    function showToast(message, timeout = 4500) {
+      toast.textContent = message; toast.style.display = 'block';
+      setTimeout(()=> toast.style.display = 'none', timeout);
+    }
 
-    // Hide loading screen
-    window.addEventListener('load', () => {
-      setTimeout(() => {
-        loadingScreen.style.opacity = '0';
-        setTimeout(() => loadingScreen.remove(), 500);
-      }, 1500);
-    });
+    function openModal(mode = 'login'){
+      modalBackdrop.style.display = 'flex';
+      renderAuth(mode);
+    }
 
-    // Toggle Login/Register
-    toggleMode.addEventListener('click', () => {
-      const isLogin = authTitle.textContent === 'Register';
-      authTitle.textContent = isLogin ? 'Login' : 'Register';
-      authBtn.textContent = isLogin ? 'Login' : 'Register';
-      nameInput.style.display = isLogin ? 'none' : 'block';
-    });
+    function closeModal(){ modalBackdrop.style.display = 'none'; }
 
-    // Auth Handler
-    authBtn.addEventListener('click', async () => {
-      const email = emailInput.value.trim();
-      const password = passwordInput.value;
-      const name = nameInput.value.trim();
+    closeModalBtn.addEventListener('click', closeModal);
+    modalBackdrop.addEventListener('click', (e)=>{ if(e.target===modalBackdrop) closeModal(); });
 
-      if (!email || !password) return alert('Email and password required.');
+    btnLogin.addEventListener('click', ()=>openModal('login'));
+    btnRegister.addEventListener('click', ()=>openModal('register'));
 
-      try {
-        if (authBtn.textContent === 'Login') {
-          await auth.signInWithEmailAndPassword(email, password);
-        } else {
-          if (!name) return alert('Please enter your name.');
+    // Render auth forms dynamically so labels are consistent
+    function renderAuth(mode){
+      authForms.innerHTML = '';
+      if(mode === 'login'){
+        authTitle.textContent = 'Login to LUMORA';
+        authForms.innerHTML = `
+          <div class="field"><input id="email" placeholder="Email" type="email" /></div>
+          <div class="field"><input id="password" placeholder="Password" type="password" /></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            <div class="small">Don't have an account? <span class="link-like" id="goto-register">Register</span></div>
+            <button class="btn btn-primary" id="login-submit">Login</button>
+          </div>
+          <div class="small">Forgot password? <span class="link-like" id="reset-password">Reset</span></div>
+        `;
+      } else {
+        authTitle.textContent = 'Create your account';
+        authForms.innerHTML = `
+          <div class="field"><input id="displayName" placeholder="Full name" type="text" /></div>
+          <div class="field"><input id="email" placeholder="Email" type="email" /></div>
+          <div class="field"><input id="password" placeholder="Password (6+ chars)" type="password" /></div>
+          <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:6px">
+            <button class="btn btn-ghost" id="goto-login">Already have account</button>
+            <button class="btn btn-primary" id="register-submit">Register</button>
+          </div>
+        `;
+      }
+
+      // bind actions
+      document.getElementById('goto-login')?.addEventListener('click', ()=>renderAuth('login'));
+      document.getElementById('goto-register')?.addEventListener('click', ()=>renderAuth('register'));
+      document.getElementById('reset-password')?.addEventListener('click', async ()=>{
+        const email = document.getElementById('email')?.value?.trim();
+        if(!email) return showToast('Enter your email in the form to reset password.');
+        try{ await auth.sendPasswordResetEmail(email); showToast('Password reset sent. Check inbox or spam.'); }
+        catch(e){ showToast(e.message || 'Failed to send reset email.'); }
+      });
+
+      document.getElementById('login-submit')?.addEventListener('click', async ()=>{
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+        if(!email || !password) return showToast('Please fill email and password.');
+        try{
+          const credential = await auth.signInWithEmailAndPassword(email, password);
+          // after sign in, check verification
+          if(!credential.user.emailVerified){
+            // show professional verification modal
+            closeModal();
+            await promptEmailVerification(credential.user);
+            return;
+          }
+          // successful and verified
+          showToast('Welcome back! Redirecting...');
+          // redirect to home (as requested)
+          window.location.href = 'home.html';
+        } catch(e){ showToast(e.message || 'Login failed'); }
+      });
+
+      document.getElementById('register-submit')?.addEventListener('click', async ()=>{
+        const name = document.getElementById('displayName').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+        if(!name || !email || !password) return showToast('Please fill all fields.');
+        try{
           const result = await auth.createUserWithEmailAndPassword(email, password);
           await result.user.updateProfile({ displayName: name });
-          await db.collection('users').doc(result.user.uid).set({
-            displayName: name, email, createdAt: new Date()
-          });
+          await db.collection('users').doc(result.user.uid).set({ displayName: name, email, createdAt: new Date() });
           await result.user.sendEmailVerification();
-          alert(`✅ Check your email (${email}) to verify your account! (Check spam folder)`);
-        }
-      } catch (error) {
-        const messages = {
-          'auth/invalid-credential': 'Invalid email or password.',
-          'auth/email-already-in-use': 'Email already in use.',
-          'auth/weak-password': 'Use a stronger password (6+ chars).',
-          'auth/invalid-email': 'Please enter a valid email.',
-          'auth/user-disabled': 'Account disabled.',
-          'auth/user-not-found': 'No user found with this email.'
-        };
-        alert(messages[error.code] || error.message);
-      }
-    });
+          closeModal();
+          // Show professional message
+          await promptEmailVerification(result.user, true);
+        } catch(e){ showToast(e.message || 'Registration failed.'); }
+      });
+    }
 
-    // Auth State
-    auth.onAuthStateChanged(async (user) => {
-      if (user) {
-        currentUser = user;
+    async function promptEmailVerification(user, afterRegister=false){
+      // professional modal informing the user to verify
+      modalBackdrop.style.display = 'flex';
+      authTitle.textContent = 'Email verification required';
+      authForms.innerHTML = `
+        <div style="margin-bottom:10px">
+          <div class="small" style="color:var(--muted)">A verification email has been sent to:</div>
+          <div style="font-weight:700;margin-top:6px">${user.email}</div>
+        </div>
+        <div class="small" style="margin-bottom:12px">To complete account activation, open the message from <em>no-reply@firebaseapp.com</em> (or similar), and click the verification link. If you can't find it, please check your spam or promotions folder.</div>
+        <div style="display:flex;gap:8px;justify-content:flex-end">
+          <button class="btn btn-ghost" id="verify-done">I verified</button>
+          <button class="btn btn-primary" id="resend-verif">Resend verification email</button>
+        </div>
+      `;
 
-        // Email verification reminder
-        if (!user.emailVerified) {
-          if (!document.querySelector('.verify-email')) {
-            const bar = Object.assign(document.createElement('div'), {
-              className: 'verify-email',
-              innerHTML: `📧 Verify your email. Check inbox & spam. <button onclick="currentUser.sendEmailVerification()">Resend</button>`
-            });
-            authUi.appendChild(bar);
-          }
-          return; // Block unverified users
-        }
+      document.getElementById('resend-verif').addEventListener('click', async ()=>{
+        try{
+          await user.sendEmailVerification();
+          showToast('Verification email resent. Check inbox or spam.');
+        }catch(e){ showToast(e.message || 'Could not resend verification.'); }
+      });
 
-        userBadge.textContent = user.displayName || user.email.split('@')[0];
-        authUi.classList.add('hidden');
-        appUi.classList.remove('hidden');
-        loadChatHistory();
+      document.getElementById('verify-done').addEventListener('click', async ()=>{
+        await user.reload();
+        if(user.emailVerified){ showToast('Email verified! Redirecting...'); window.location.href = 'home.html'; }
+        else showToast('We still cannot detect verification. Please click the link in the email and then press "I verified".');
+      });
+
+      if(afterRegister) showToast('A verification email was sent. Please verify to access full features.');
+    }
+
+    // Global auth state listener
+    auth.onAuthStateChanged(user=>{
+      if(user){
+        userBadge.textContent = user.displayName || user.email.split('@')[0] || 'User';
+        logoutBtn.style.display = 'inline-block';
+        btnLogin.style.display = 'none';
+        btnRegister.style.display = 'none';
       } else {
-        appUi.classList.add('hidden');
-        authUi.classList.remove('hidden');
+        userBadge.textContent = 'Guest';
+        logoutBtn.style.display = 'none';
+        btnLogin.style.display = 'inline-block';
+        btnRegister.style.display = 'inline-block';
       }
     });
 
-    // Logout
-    logoutBtn.addEventListener('click', () => auth.signOut());
-
-    // New Chat
-    newChatBtn.addEventListener('click', () => {
-      chatMessages.innerHTML = '';
-      addMessage("👋 New chat started. How can I help you?", "bot");
+    logoutBtn.addEventListener('click', ()=>{
+      auth.signOut().then(()=> showToast('Signed out.')).catch(e=> showToast(e.message));
     });
 
-    // File Upload
-    addFileBtn.addEventListener('click', () => fileInput.click());
-    fileInput.addEventListener('change', async (e) => {
-      const file = e.target.files[0];
-      if (!file || !currentUser) return;
-
-      const ref = storage.ref(`uploads/${currentUser.uid}/${Date.now()}_${file.name}`);
-      try {
-        const snapshot = await ref.put(file);
-        const url = await snapshot.ref.getDownloadURL();
-        addMessage(`📎 Uploaded: ${file.name}`, "user");
-        addMessage("I can help analyze your file. Ask me anything about it!", "bot");
-      } catch (err) {
-        addMessage(`❌ Upload failed: ${err.message}`, "bot");
-      }
-      fileInput.value = '';
+    // Upload button: requires login
+    uploadBtn.addEventListener('click', ()=>{
+      if(!auth.currentUser){ openModal('login'); showToast('Please login or register to upload files.'); return; }
+      if(!auth.currentUser.emailVerified){ openModal('login'); showToast('Please verify your email before uploading.'); return; }
+      // If reached, show file selector (we'll create an input on demand)
+      const input = document.createElement('input'); input.type='file'; input.onchange = async (e)=>{
+        const file = e.target.files[0]; if(!file) return;
+        const ref = storage.ref(`uploads/${auth.currentUser.uid}/${Date.now()}_${file.name}`);
+        try{ const snap = await ref.put(file); const url = await snap.ref.getDownloadURL(); addMessage(`📎 Uploaded: ${file.name}`, 'user'); addMessage('File uploaded. Ask me about it!', 'bot'); }
+        catch(err){ addMessage('❌ Upload failed: '+(err.message||''),'bot'); }
+      };
+      input.click();
     });
 
-    // Send Message
-    const handleSend = async () => {
-      const text = chatInput.value.trim();
-      if (!text) return;
-
-      addMessage(text, "user");
-      chatInput.value = "";
-      showTypingIndicator();
-
-      const reply = await askCohere(text);
-      removeTypingIndicator();
-      addMessage(reply, "bot");
-    };
-
-    sendBtn.addEventListener('click', handleSend);
-    chatInput.addEventListener('keypress', e => e.key === 'Enter' && handleSend());
-
-    // Utilities
-    function addMessage(text, sender) {
-      const msg = Object.assign(document.createElement('div'), {
-        className: `message ${sender}`,
-        textContent: text
-      });
-      const time = Object.assign(document.createElement('div'), {
-        className: 'message-time',
-        textContent: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-      });
-      msg.appendChild(time);
-      chatMessages.appendChild(msg);
-      chatMessages.scrollTop = chatMessages.scrollHeight;
+    // Chat send handling - Guests can chat
+    function addMessage(text, sender='bot'){
+      const el = document.createElement('div'); el.className = 'msg ' + (sender==='user'?'user':'bot');
+      el.innerHTML = `<div>${escapeHtml(text)}</div><span class="time">${new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span>`;
+      chatMessages.appendChild(el); chatMessages.scrollTop = chatMessages.scrollHeight;
     }
 
-    function showTypingIndicator() {
-      const el = document.createElement('div');
-      el.className = 'typing-indicator';
-      el.id = 'typing-indicator';
-      el.innerHTML = '<div class="typing-dot"></div>'.repeat(3);
-      chatMessages.appendChild(el);
-      chatMessages.scrollTop = chatMessages.scrollHeight;
-    }
+    function escapeHtml(s){ return s.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
 
-    function removeTypingIndicator() {
-      document.getElementById('typing-indicator')?.remove();
-    }
-
-    // Ask Cohere
-    async function askCohere(message) {
-      try {
-        const res = await fetch("https://api.cohere.ai/v1/chat", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${COHERE_API_KEY}`
-          },
-          body: JSON.stringify({ model: "command-r", message })
+    async function askCohere(message){
+      try{
+        const res = await fetch('https://api.cohere.ai/v1/chat',{
+          method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${COHERE_API_KEY}`},
+          body: JSON.stringify({ model: 'command-r', message })
         });
         const data = await res.json();
-        return data.text || "Sorry, I couldn't respond.";
-      } catch (err) {
-        console.error(err);
-        return "⚠️ AI temporarily unavailable.";
-      }
+        // Cohere returns various shapes; try to be resilient
+        return data.text || data.output?.[0]?.content || JSON.stringify(data);
+      }catch(e){ console.error(e); return '⚠️ AI temporarily unavailable.'; }
     }
 
-    // Load Chat History (Placeholder)
-    function loadChatHistory() {
-      chatHistory.innerHTML = '';
-      const item = document.createElement('div');
-      item.className = 'history-item active';
-      item.textContent = 'Today';
-      chatHistory.appendChild(item);
+    async function handleSend(){
+      const text = chatInput.value.trim(); if(!text) return;
+      addMessage(text,'user'); chatInput.value='';
+      // show typing
+      const typing = document.createElement('div'); typing.className='msg bot'; typing.innerHTML = '<em>Thinking…</em><span class="time">&nbsp;</span>'; chatMessages.appendChild(typing); chatMessages.scrollTop = chatMessages.scrollHeight;
+      const reply = await askCohere(text);
+      typing.remove(); addMessage(reply,'bot');
     }
+
+    sendBtn.addEventListener('click', handleSend);
+    chatInput.addEventListener('keydown', (e)=>{ if(e.key==='Enter') handleSend(); });
+
+    // Small UX: Preload history
+    function loadChatHistory(){ const h = document.getElementById('chat-history'); h.innerHTML=''; const item = document.createElement('div'); item.className='history-item active'; item.textContent='Today'; h.appendChild(item); }
+    loadChatHistory();
+
+    // If user is already logged in and verified on page load -> redirect to home directly
+    auth.onAuthStateChanged(async (u)=>{
+      if(u && u.emailVerified){
+        // If explicit redirect desired (user requested), go to home.html
+        // Commented out to avoid surprise; uncomment if you want automatic redirect
+        // window.location.href = 'home.html';
+      }
+    });
+
   </script>
 </body>
 </html>

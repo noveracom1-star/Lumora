@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="LUMORA - Profile" />
+  <title>LUMORA - Profile</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+
+  <style>
+    :root{--bg:#0f1724; --card:#0b1220; --accent1:#6e48aa; --accent2:#4776E6; --white:#e6eef8; --muted:#94a3b8; --shadow:0 10px 30px rgba(2,6,23,0.6); --radius:14px;}
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%; font-family: Inter, sans-serif; background: var(--bg); color:var(--white);}
+    body{display:flex;flex-direction:column;min-height:100vh;}
+    header{display:flex;align-items:center;justify-content:space-between;padding:18px 28px;border-bottom:1px solid rgba(255,255,255,0.05);}
+    .brand{display:flex;align-items:center;gap:12px;}
+    .brand .logo{width:46px;height:46px;border-radius:10px;background:linear-gradient(135deg,var(--accent2),var(--accent1));display:flex;align-items:center;justify-content:center;font-weight:800;box-shadow:var(--shadow);}
+    main{flex:1;display:flex;flex-direction:column;max-width:800px;margin:20px auto;gap:22px;}
+    .profile-card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:var(--radius);padding:24px;box-shadow:var(--shadow);}
+    .profile-card h2{margin-bottom:16px;}
+    .profile-info{display:flex;gap:16px;align-items:center;margin-bottom:16px;}
+    .avatar{width:100px;height:100px;border-radius:50%;background:linear-gradient(135deg,var(--accent2),var(--accent1));display:flex;align-items:center;justify-content:center;font-size:36px;color:white;cursor:pointer;}
+    .info-fields{flex:1;display:flex;flex-direction:column;gap:10px;}
+    .info-fields label{font-size:13px;color:var(--muted)}
+    .info-fields input{padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:white;outline:none}
+    .btn{padding:10px 14px;border-radius:10px;border:none;cursor:pointer;font-weight:600;box-shadow:var(--shadow);}
+    .btn-primary{background:linear-gradient(90deg,var(--accent2),var(--accent1));color:white;}
+    .btn-danger{background:var(--danger);color:white;}
+    footer{padding:18px;text-align:center;color:var(--muted);font-size:13px}
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <div class="logo">L</div>
+      <h1>LUMORA Profile</h1>
+    </div>
+    <button class="btn btn-danger" id="logout-btn">Logout</button>
+  </header>
+
+  <main>
+    <div class="profile-card">
+      <h2>Your Profile</h2>
+      <div class="profile-info">
+        <div class="avatar" id="avatar-btn"><i class="fas fa-user"></i></div>
+        <div class="info-fields">
+          <label>Name</label>
+          <input type="text" id="displayName" readonly>
+          <label>Email</label>
+          <input type="text" id="email" readonly>
+        </div>
+      </div>
+      <button class="btn btn-primary" id="save-btn" style="display:none">Save Changes</button>
+    </div>
+  </main>
+
+  <footer>From AITECH by ANOINTING • Powered by Cohere AI • © 2023–2025 LUMORA</footer>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBOwdgpt4PSo_MLMmz716zswPnpInaXfok",
+      authDomain: "lumora-b227c.firebaseapp.com",
+      projectId: "lumora-b227c",
+      storageBucket: "lumora-b227c.firebasestorage.app",
+      messagingSenderId: "126529099616",
+      appId: "1:126529099616:web:303e8d8c987ecd6ba1b005"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    const storage = firebase.storage();
+
+    const displayNameInput = document.getElementById('displayName');
+    const emailInput = document.getElementById('email');
+    const avatarBtn = document.getElementById('avatar-btn');
+    const logoutBtn = document.getElementById('logout-btn');
+    const toast = document.getElementById('toast');
+
+    function showToast(msg,time=4000){ toast.textContent=msg; toast.style.display='block'; setTimeout(()=>toast.style.display='none',time); }
+
+    auth.onAuthStateChanged(u=>{
+      if(!u){ window.location.href='index.html'; return; }
+      displayNameInput.value = u.displayName || '';
+      emailInput.value = u.email;
+      if(u.photoURL) avatarBtn.style.backgroundImage = `url(${u.photoURL})`;
+    });
+
+    logoutBtn.addEventListener('click', ()=>{ auth.signOut().then(()=> window.location.href='index.html'); });
+
+    avatarBtn.addEventListener('click', ()=>{
+      const input = document.createElement('input'); input.type='file'; input.accept='image/*';
+      input.onchange=async(e)=>{
+        const file = e.target.files[0]; if(!file) return;
+        const ref = storage.ref(`avatars/${auth.currentUser.uid}/${Date.now()}_${file.name}`);
+        const snap = await ref.put(file); const url = await snap.ref.getDownloadURL();
+        await auth.currentUser.updateProfile({ photoURL: url });
+        avatarBtn.style.backgroundImage = `url(${url})`;
+        showToast('Profile photo updated!');
+      }; input.click();
+    });
+  </script>
+</body>
+</html>
