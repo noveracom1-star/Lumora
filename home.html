@@ -74,6 +74,160 @@
       transition: background-color 0.3s ease, color 0.3s ease;
     }
 
+    /* Loading Screen */
+    .loading-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--bg-primary);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      transition: opacity 0.5s ease, visibility 0.5s ease;
+    }
+
+    .loading-screen.hidden {
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    .loading-container {
+      position: relative;
+      width: 200px;
+      height: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .loading-logo {
+      width: 80px;
+      height: 80px;
+      border-radius: 18px;
+      background: var(--accent-gradient);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      z-index: 2;
+      box-shadow: 0 0 30px rgba(99, 102, 241, 0.4);
+      animation: pulse 2s infinite ease-in-out;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); box-shadow: 0 0 30px rgba(99, 102, 241, 0.4); }
+      50% { transform: scale(1.05); box-shadow: 0 0 50px rgba(99, 102, 241, 0.6); }
+      100% { transform: scale(1); box-shadow: 0 0 30px rgba(99, 102, 241, 0.4); }
+    }
+
+    .loading-logo svg {
+      width: 40px;
+      height: 40px;
+      fill: white;
+    }
+
+    .orbital-ring {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border: 2px solid transparent;
+      border-top: 2px solid var(--accent-primary);
+      border-radius: 50%;
+      animation: spin 3s linear infinite;
+    }
+
+    .orbital-ring:nth-child(2) {
+      width: 80%;
+      height: 80%;
+      border-top: 2px solid var(--accent-secondary);
+      animation: spinReverse 2.5s linear infinite;
+    }
+
+    .orbital-ring:nth-child(3) {
+      width: 120%;
+      height: 120%;
+      border-top: 2px solid rgba(129, 140, 248, 0.7);
+      animation: spin 4s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @keyframes spinReverse {
+      0% { transform: rotate(360deg); }
+      100% { transform: rotate(0deg); }
+    }
+
+    .particles {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+    }
+
+    .particle {
+      position: absolute;
+      width: 6px;
+      height: 6px;
+      background: var(--accent-primary);
+      border-radius: 50%;
+      opacity: 0.6;
+    }
+
+    .loading-text {
+      margin-top: 40px;
+      text-align: center;
+    }
+
+    .loading-text h1 {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .loading-text p {
+      color: var(--text-muted);
+      font-size: 14px;
+      letter-spacing: 0.5px;
+    }
+
+    .progress-bar {
+      width: 200px;
+      height: 4px;
+      background: var(--bg-tertiary);
+      border-radius: 10px;
+      margin-top: 20px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .progress-fill {
+      position: absolute;
+      height: 100%;
+      width: 0%;
+      background: var(--accent-gradient);
+      border-radius: 10px;
+      transition: width 0.8s ease;
+    }
+
+    .loading-footer {
+      position: absolute;
+      bottom: 30px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 12px;
+      letter-spacing: 0.5px;
+    }
+
     /* App Layout */
     .app-container {
       display: flex;
@@ -190,7 +344,7 @@
       width: 36px;
       height: 36px;
       border-radius: 50%;
-      border: none;
+      border: nothing;
       background: var(--danger);
       color: white;
       font-weight: 600;
@@ -496,25 +650,6 @@
       background: var(--bg-secondary);
     }
 
-    .attachment-btn {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      border: none;
-      background: var(--bg-tertiary);
-      color: var(--text-primary);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: var(--transition);
-      font-size: 16px;
-    }
-
-    .attachment-btn:hover {
-      background: var(--accent-primary);
-    }
-
     .chat-input {
       flex: 1;
       padding: 12px 16px;
@@ -587,77 +722,6 @@
       color: var(--text-muted);
       margin-top: 6px;
       font-size: 14px;
-    }
-
-    /* File upload bottom sheet */
-    .upload-sheet {
-      position: fixed;
-      bottom: -320px;
-      left: 0;
-      width: 100%;
-      background: var(--bg-secondary);
-      border-top: 1px solid var(--card-border);
-      border-radius: 20px 20px 0 0;
-      padding: 20px;
-      z-index: 100;
-      transition: var(--transition);
-      box-shadow: var(--shadow-lg);
-    }
-
-    .upload-sheet.open {
-      bottom: 0;
-    }
-
-    .upload-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-    }
-
-    .upload-header h3 {
-      font-size: 18px;
-      font-weight: 600;
-    }
-
-    .close-sheet {
-      background: none;
-      border: none;
-      color: var(--text-primary);
-      font-size: 24px;
-      cursor: pointer;
-    }
-
-    .upload-options {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 16px;
-    }
-
-    .upload-option {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 20px;
-      background: var(--card-bg);
-      border-radius: var(--radius-md);
-      border: 1px solid var(--card-border);
-      cursor: pointer;
-      transition: var(--transition);
-    }
-
-    .upload-option:hover {
-      background: var(--bg-tertiary);
-    }
-
-    .upload-option i {
-      font-size: 32px;
-      margin-bottom: 12px;
-    }
-
-    .upload-option span {
-      font-size: 14px;
-      font-weight: 500;
     }
 
     /* Footer */
@@ -863,10 +927,6 @@
         padding: 12px;
       }
       
-      .upload-options {
-        grid-template-columns: 1fr;
-      }
-      
       .contact-options {
         flex-direction: column;
       }
@@ -875,6 +935,20 @@
         max-width: 90%;
         font-size: 13px;
         padding: 12px;
+      }
+
+      .loading-container {
+        width: 160px;
+        height: 160px;
+      }
+
+      .loading-logo {
+        width: 60px;
+        height: 60px;
+      }
+
+      .loading-text h1 {
+        font-size: 24px;
       }
     }
 
@@ -893,6 +967,30 @@
   </style>
 </head>
 <body>
+  <!-- Loading Screen -->
+  <div class="loading-screen" id="loading-screen">
+    <div class="loading-container">
+      <div class="orbital-ring"></div>
+      <div class="orbital-ring"></div>
+      <div class="orbital-ring"></div>
+      <div class="loading-logo">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15h-2v-6h2v6zm4 0h-2v-6h2v6zm-6-8c0-.55.45-1 1-1s1 .45 1 1-.45 1-1 1-1-.45-1-1zm8 0c0-.55.45-1 1-1s1 .45 1 1-.45 1-1 1-1-.45-1-1z"/>
+        </svg>
+      </div>
+    </div>
+    <div class="loading-text">
+      <h1>LUMORA</h1>
+      <p>Initializing AI Assistant</p>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress-fill"></div>
+    </div>
+    <div class="loading-footer">
+      From NOVERA by AITECH
+    </div>
+  </div>
+
   <div class="app-container">
     <!-- Header -->
     <header class="app-header">
@@ -998,9 +1096,6 @@
         </div>
         
         <div class="input-area">
-          <button class="attachment-btn" id="upload-btn" title="Upload files">
-            <i class="fas fa-paperclip"></i>
-          </button>
           <input type="text" class="chat-input" id="chat-input" placeholder="Type your message here..." />
           <button class="send-btn" id="send-btn">
             <i class="fas fa-paper-plane"></i>
@@ -1124,34 +1219,6 @@
       </div>
     </main>
     
-    <!-- File Upload Bottom Sheet -->
-    <div class="upload-sheet" id="upload-sheet">
-      <div class="upload-header">
-        <h3>Upload File</h3>
-        <button class="close-sheet" id="close-sheet">
-          <i class="fas fa-times"></i>
-        </button>
-      </div>
-      <div class="upload-options">
-        <div class="upload-option" data-type="image">
-          <i class="fas fa-image"></i>
-          <span>Photo</span>
-        </div>
-        <div class="upload-option" data-type="video">
-          <i class="fas fa-video"></i>
-          <span>Video</span>
-        </div>
-        <div class="upload-option" data-type="file">
-          <i class="fas fa-file"></i>
-          <span>File</span>
-        </div>
-        <div class="upload-option" data-type="camera">
-          <i class="fas fa-camera"></i>
-          <span>Camera</span>
-        </div>
-      </div>
-    </div>
-    
     <!-- Footer -->
     <footer class="app-footer">
       From NOVERA powered by AITECH 2025 LUMORA
@@ -1208,7 +1275,6 @@
     const toast = document.getElementById('toast');
     const toastMessage = document.getElementById('toast-message');
     const chatHistoryEl = document.getElementById('chat-history');
-    const uploadBtn = document.getElementById('upload-btn');
     const logoutBtn = document.getElementById('logout-btn');
     const profileBtn = document.getElementById('profile-btn');
     const newChatBtn = document.getElementById('new-chat-btn');
@@ -1218,15 +1284,14 @@
     const overlay = document.getElementById('overlay');
     const mainContent = document.getElementById('main-content');
     const themeBtn = document.getElementById('theme-btn');
-    const uploadSheet = document.getElementById('upload-sheet');
-    const closeSheet = document.getElementById('close-sheet');
-    const uploadOptions = document.querySelectorAll('.upload-option');
     const navItems = document.querySelectorAll('.nav-item');
     const screens = document.querySelectorAll('.screen');
     const messageOptions = document.getElementById('message-options');
     const notificationsBtn = document.getElementById('notifications-btn');
     const darkModeBtn = document.getElementById('dark-mode-btn');
     const notificationsToggle = document.getElementById('notifications-toggle');
+    const loadingScreen = document.getElementById('loading-screen');
+    const progressFill = document.getElementById('progress-fill');
 
     let currentChatId = null;
     let isDarkMode = true;
@@ -1238,6 +1303,22 @@
       document.body.classList.add('light-mode');
       isDarkMode = false;
       themeBtn.innerHTML = '<i class="fas fa-sun"></i>';
+    }
+
+    // Simulate loading progress
+    function simulateLoading() {
+      let progress = 0;
+      const interval = setInterval(() => {
+        progress += Math.random() * 10;
+        if (progress >= 100) {
+          progress = 100;
+          clearInterval(interval);
+          setTimeout(() => {
+            loadingScreen.classList.add('hidden');
+          }, 500);
+        }
+        progressFill.style.width = `${progress}%`;
+      }, 300);
     }
 
     // Utility Functions
@@ -1301,100 +1382,6 @@
         if (window.innerWidth <= 768) {
           toggleDrawer();
         }
-      });
-    });
-
-    // Toggle Upload Sheet
-    uploadBtn.addEventListener('click', () => {
-      uploadSheet.classList.add('open');
-      overlay.classList.add('active');
-    });
-
-    closeSheet.addEventListener('click', () => {
-      uploadSheet.classList.remove('open');
-      overlay.classList.remove('active');
-    });
-
-    overlay.addEventListener('click', () => {
-      uploadSheet.classList.remove('open');
-      overlay.classList.remove('active');
-    });
-
-    // Handle Upload Options
-    uploadOptions.forEach(option => {
-      option.addEventListener('click', () => {
-        const type = option.getAttribute('data-type');
-        const input = document.createElement('input');
-        
-        switch(type) {
-          case 'image':
-            input.type = 'file';
-            input.accept = 'image/*';
-            break;
-          case 'video':
-            input.type = 'file';
-            input.accept = 'video/*';
-            break;
-          case 'file':
-            input.type = 'file';
-            input.accept = '.pdf,.doc,.docx,.txt';
-            break;
-          case 'camera':
-            // This would require getUserMedia API
-            showToast('Camera access not implemented in this demo');
-            return;
-        }
-        
-        input.onchange = async (e) => {
-          const file = e.target.files[0];
-          if (!file) return;
-          
-          showToast(`Uploading ${file.name}...`);
-          
-          try {
-            const ref = storage.ref(`uploads/${auth.currentUser.uid}/${Date.now()}_${file.name}`);
-            const snap = await ref.put(file);
-            const url = await snap.ref.getDownloadURL();
-            
-            // Handle different file types
-            if (file.type.startsWith('image/')) {
-              addMessage(`📷 Image: ${file.name}`, 'user');
-              // Create image container
-              const imageContainer = document.createElement('div');
-              imageContainer.className = 'image-container';
-              imageContainer.innerHTML = `<img src="${url}" alt="${file.name}">`;
-              
-              // Add image to the last user message
-              const userMessages = document.querySelectorAll('.message.user');
-              if (userMessages.length > 0) {
-                userMessages[userMessages.length - 1].appendChild(imageContainer);
-              }
-              
-              addMessage(`I can see your image. How can I help you with it?`, 'bot');
-            } else {
-              addMessage(`📎 Uploaded: ${file.name}`, 'user');
-              addMessage(`I've received your file. How can I help you with "${file.name}"?`, 'bot');
-            }
-            
-            if (currentChatId) {
-              await db.collection('chats').doc(currentChatId).collection('messages').add({
-                text: `Uploaded: ${file.name} - ${url}`,
-                sender: 'user',
-                timestamp: new Date()
-              });
-            }
-            
-            showToast('File uploaded successfully!');
-          } catch (err) {
-            console.error('Upload error:', err);
-            addMessage('❌ Upload failed. Please try again.', 'bot');
-            showToast('Upload failed');
-          }
-        };
-        
-        input.click();
-        uploadSheet.classList.remove('open');
-        overlay.classList.remove('active');
       });
     });
 
@@ -1685,6 +1672,9 @@
       loadChatHistory();
     });
 
+    // Start loading simulation
+    simulateLoading();
+
     // Improve mobile experience
     document.addEventListener('touchstart', function() {
       // Close keyboard when tapping outside input
@@ -1697,12 +1687,6 @@
     chatInput.addEventListener('focus', function() {
       window.scrollTo(0, 0);
       document.body.scrollTop = 0;
-    });
-
-    // Fix for upload sheet appearing at bottom on mobile
-    window.addEventListener('load', function() {
-      // Ensure upload sheet is hidden on page load
-      uploadSheet.classList.remove('open');
     });
   </script>
 </body>
