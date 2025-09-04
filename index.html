@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>LUMORA - Advanced AI Assistant</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+  <style>
+    :root {
+      --primary-gradient: linear-gradient(135deg, #4776E6 0%, #8E54E9 100%);
+      --secondary-gradient: linear-gradient(135deg, #6e48aa 0%, #9d50bb 100%);
+      --user-message-bg: linear-gradient(135deg, #4776E6 0%, #5A87FF 100%);
+      --bot-message-bg: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+      --dark-text: #2D3748;
+      --light-text: #FFFFFF;
+      --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      --input-bg: #FFFFFF;
+      --container-bg: #FFFFFF;
+      --accent-color: #8E54E9;
+      --typing-indicator: #E2E8F0;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      transition: background-color 0.3s ease;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f8fafc;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      color: var(--dark-text);
+    }
+
+    /* Loading Screen */
+    #loading-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--primary-gradient);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      transition: opacity 0.5s ease, visibility 0.5s;
+    }
+
+    .loading-logo {
+      width: 120px;
+      height: 120px;
+      margin-bottom: 30px;
+      position: relative;
+    }
+
+    .logo-circle {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      border: 3px solid rgba(255, 255, 255, 0.1);
+      border-top-color: white;
+      animation: spin 1.2s linear infinite;
+    }
+
+    .logo-inner {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 2.5rem;
+      font-weight: bold;
+      color: white;
+    }
+
+    .loading-text {
+      color: white;
+      font-size: 1.2rem;
+      margin-top: 20px;
+      letter-spacing: 2px;
+    }
+
+    .loading-progress {
+      width: 200px;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+      margin-top: 15px;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: white;
+      border-radius: 4px;
+      animation: loading 2s ease-in-out forwards;
+    }
+
+    @keyframes loading {
+      0% { width: 0%; }
+      100% { width: 100%; }
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    header {
+      background: var(--primary-gradient);
+      color: var(--light-text);
+      padding: 1.2rem;
+      text-align: center;
+      position: relative;
+      box-shadow: var(--shadow);
+    }
+
+    .header-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      font-size: 1.8rem;
+      font-weight: 700;
+    }
+
+    .logo i {
+      margin-right: 10px;
+      font-size: 1.5rem;
+    }
+
+    .nav-icons {
+      display: flex;
+      gap: 15px;
+    }
+
+    .nav-icons i {
+      font-size: 1.2rem;
+      cursor: pointer;
+      opacity: 0.8;
+      transition: opacity 0.2s;
+    }
+
+    .nav-icons i:hover {
+      opacity: 1;
+    }
+
+    .main-container {
+      display: flex;
+      flex: 1;
+      max-width: 1400px;
+      margin: 0 auto;
+      width: 100%;
+      padding: 20px;
+      gap: 20px;
+    }
+
+    .sidebar {
+      width: 280px;
+      background: var(--container-bg);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sidebar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .new-chat-btn {
+      background: var(--primary-gradient);
+      color: white;
+      border: none;
+      border-radius: 20px;
+      padding: 8px 12px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .chat-history {
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .history-item {
+      padding: 12px 15px;
+      border-radius: 12px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .history-item:hover {
+      background: #F1F5F9;
+    }
+
+    .history-item.active {
+      background: var(--primary-gradient);
+      color: white;
+    }
+
+    .history-item i {
+      font-size: 0.8rem;
+      opacity: 0.6;
+    }
+
+    .auth-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 70vh;
+      gap: 20px;
+      padding: 20px;
+    }
+
+    .auth-form {
+      background: white;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      width: 100%;
+      max-width: 400px;
+    }
+
+    .auth-form h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: var(--dark-text);
+    }
+
+    .auth-form input {
+      width: 100%;
+      padding: 12px 15px;
+      margin: 10px 0;
+      border: 1px solid #E2E8F0;
+      border-radius: 8px;
+      outline: none;
+    }
+
+    .auth-form input:focus {
+      border-color: var(--accent-color);
+    }
+
+    .auth-btn {
+      width: 100%;
+      padding: 12px;
+      background: var(--primary-gradient);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+
+    .switch-mode {
+      text-align: center;
+      margin-top: 15px;
+      color: #666;
+    }
+
+    .switch-mode a {
+      color: var(--accent-color);
+      cursor: pointer;
+    }
+
+    .verify-email {
+      background: #FEF3C7;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      text-align: center;
+      font-size: 0.9rem;
+      color: #927404;
+    }
+
+    .chat-container {
+      flex: 1;
+      background: var(--container-bg);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      height: 75vh;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .chat-header {
+      padding: 20px;
+      border-bottom: 1px solid #EDF2F7;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .chat-header i {
+      font-size: 1.5rem;
+      color: var(--accent-color);
+      margin-right: 10px;
+    }
+
+    .chat-header h2 {
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+
+    .user-badge {
+      font-size: 0.8rem;
+      background: #E2E8F0;
+      padding: 4px 10px;
+      border-radius: 20px;
+    }
+
+    .chat-messages {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      background: #fafafa;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .message {
+      max-width: 75%;
+      padding: 15px 20px;
+      border-radius: 18px;
+      animation: fadeIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      position: relative;
+      line-height: 1.5;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      white-space: pre-wrap;
+    }
+
+    .user {
+      background: var(--user-message-bg);
+      color: var(--light-text);
+      margin-left: auto;
+      border-bottom-right-radius: 5px;
+    }
+
+    .bot {
+      background: var(--bot-message-bg);
+      color: var(--dark-text);
+      margin-right: auto;
+      border-bottom-left-radius: 5px;
+    }
+
+    .message-time {
+      font-size: 0.7rem;
+      opacity: 0.7;
+      margin-top: 5px;
+      text-align: right;
+    }
+
+    .file-preview {
+      margin-top: 10px;
+      font-size: 0.9rem;
+      padding: 8px;
+      background: #EDF2F7;
+      border-radius: 8px;
+      word-break: break-all;
+    }
+
+    .file-preview a {
+      color: var(--accent-color);
+    }
+
+    .typing-indicator {
+      background: var(--bot-message-bg);
+      color: var(--dark-text);
+      padding: 15px 20px;
+      border-radius: 18px;
+      margin-right: auto;
+      border-bottom-left-radius: 5px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      max-width: 100px;
+    }
+
+    .typing-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--accent-color);
+      border-radius: 50%;
+      display: inline-block;
+      animation: typingAnimation 1.4s infinite ease-in-out;
+    }
+
+    .typing-dot:nth-child(1) { animation-delay: 0s; }
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes typingAnimation {
+      0%, 60%, 100% { transform: translateY(0); opacity: 0.6; }
+      30% { transform: translateY(-5px); opacity: 1; }
+    }
+
+    .chat-input-container {
+      padding: 20px;
+      border-top: 1px solid #EDF2F7;
+      background: white;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .input-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .input-actions i {
+      font-size: 1.2rem;
+      color: #A0AEC0;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .input-actions i:hover {
+      color: var(--accent-color);
+    }
+
+    .chat-input {
+      flex: 1;
+      padding: 15px 20px;
+      border: none;
+      background: #F7FAFC;
+      border-radius: 24px;
+      outline: none;
+      font-size: 1rem;
+    }
+
+    .chat-input:focus {
+      background: #EDF2F7;
+      box-shadow: 0 0 0 2px rgba(135, 96, 234, 0.2);
+    }
+
+    .send-btn {
+      background: var(--primary-gradient);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      cursor: pointer;
+      font-size: 1.2rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 4px 10px rgba(135, 96, 234, 0.3);
+    }
+
+    .send-btn:hover {
+      transform: translateY(-2px);
+    }
+
+    footer {
+      text-align: center;
+      padding: 20px;
+      color: #A0AEC0;
+      font-size: 0.9rem;
+      margin-top: auto;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .hidden { display: none !important; }
+
+    @media (max-width: 900px) {
+      .main-container { flex-direction: column; }
+      .sidebar { width: 100%; max-height: 200px; }
+    }
+
+    @media (max-width: 600px) {
+      .message { max-width: 90%; }
+      .header-content { flex-direction: column; gap: 10px; }
+      .chat-input-container { padding: 15px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Loading Screen -->
+  <div id="loading-screen">
+    <div class="loading-logo">
+      <div class="logo-circle"></div>
+      <div class="logo-inner">L</div>
+    </div>
+    <div class="loading-text">LUMORA AI</div>
+    <div class="loading-progress">
+      <div class="progress-bar"></div>
+    </div>
+  </div>
+
+  <!-- Auth UI -->
+  <div id="auth-ui" class="auth-container">
+    <div class="auth-form">
+      <h2 id="auth-title">Register</h2>
+      <input type="text" id="name-input" placeholder="Full Name" />
+      <input type="email" id="email-input" placeholder="Email" />
+      <input type="password" id="password-input" placeholder="Password" />
+      <button class="auth-btn" id="auth-btn">Register</button>
+      <div class="switch-mode">
+        Already have an account? <a id="toggle-mode">Login</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main App UI -->
+  <div id="app-ui" class="hidden">
+    <header>
+      <div class="header-content">
+        <div class="logo">
+          <i class="fas fa-brain"></i>
+          <span>LUMORA</span>
+        </div>
+        <div class="nav-icons">
+          <i class="fas fa-user-circle" id="profile-icon"></i>
+          <i class="fas fa-sign-out-alt" id="logout-btn"></i>
+        </div>
+      </div>
+    </header>
+
+    <div class="main-container">
+      <aside class="sidebar">
+        <div class="sidebar-header">
+          <h3>Chat History</h3>
+          <button class="new-chat-btn" id="new-chat-btn">
+            <i class="fas fa-plus"></i> New
+          </button>
+        </div>
+        <div class="chat-history" id="chat-history">
+          <!-- Dynamically filled -->
+        </div>
+      </aside>
+
+      <div class="chat-container">
+        <div class="chat-header">
+          <i class="fas fa-robot"></i>
+          <h2>LUMORA AI Assistant</h2>
+          <div class="user-badge" id="user-badge"></div>
+        </div>
+        <div class="chat-messages" id="chat-messages">
+          <div class="message bot">
+            👋 Hello! I'm LUMORA, your advanced AI assistant. How can I help you today?
+            <div class="message-time">Just now</div>
+          </div>
+        </div>
+        <div class="chat-input-container">
+          <div class="input-actions">
+            <i class="fas fa-plus-circle" id="add-file-btn"></i>
+            <input type="file" id="file-input" class="hidden" />
+          </div>
+          <input type="text" id="chat-input" class="chat-input" placeholder="Type your message here...">
+          <button class="send-btn" id="send-btn">
+            <i class="fas fa-paper-plane"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <p>From AITECH by ANOINTING • Powered by Cohere AI • © 2023 LUMORA</p>
+    </footer>
+  </div>
+
+  <script>
+    // Firebase Configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyBOwdgpt4PSo_MLMmz716zswPnpInaXfok",
+      authDomain: "lumora-b227c.firebaseapp.com",
+      projectId: "lumora-b227c",
+      storageBucket: "lumora-b227c.firebasestorage.app",
+      messagingSenderId: "126529099616",
+      appId: "1:126529099616:web:303e8d8c987ecd6ba1b005",
+      measurementId: "G-83DKQ20SV8"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    const storage = firebase.storage();
+
+    // 🔑 Hardcoded Cohere API Key (Exposed – Only for testing!)
+    const COHERE_API_KEY = "NMGQyIAUHmb861NWLZW2iDHik3Vui8No6dLxj7Gs";
+
+    // DOM Elements
+    const loadingScreen = document.getElementById('loading-screen');
+    const authUi = document.getElementById('auth-ui');
+    const appUi = document.getElementById('app-ui');
+    const authTitle = document.getElementById('auth-title');
+    const nameInput = document.getElementById('name-input');
+    const emailInput = document.getElementById('email-input');
+    const passwordInput = document.getElementById('password-input');
+    const authBtn = document.getElementById('auth-btn');
+    const toggleMode = document.getElementById('toggle-mode');
+    const logoutBtn = document.getElementById('logout-btn');
+    const profileIcon = document.getElementById('profile-icon');
+    const userBadge = document.getElementById('user-badge');
+    const chatMessages = document.getElementById('chat-messages');
+    const chatInput = document.getElementById('chat-input');
+    const sendBtn = document.getElementById('send-btn');
+    const newChatBtn = document.getElementById('new-chat-btn');
+    const addFileBtn = document.getElementById('add-file-btn');
+    const fileInput = document.getElementById('file-input');
+    const chatHistory = document.getElementById('chat-history');
+
+    let isLoginMode = true;
+    let currentUser = null;
+    let currentChatId = null;
+
+    // Hide loading screen
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        loadingScreen.style.opacity = '0';
+        loadingScreen.style.visibility = 'hidden';
+      }, 2000);
+    });
+
+    // Toggle between login and register
+    toggleMode.addEventListener('click', () => {
+      isLoginMode = !isLoginMode;
+      authTitle.textContent = isLoginMode ? 'Login' : 'Register';
+      authBtn.textContent = isLoginMode ? 'Login' : 'Register';
+      nameInput.style.display = isLoginMode ? 'none' : 'block';
+    });
+
+    // Authentication Button
+    authBtn.addEventListener('click', async () => {
+      const email = emailInput.value.trim();
+      const password = passwordInput.value;
+      const name = nameInput.value.trim();
+
+      if (!email || !password) return alert('Please enter email and password.');
+
+      try {
+        if (isLoginMode) {
+          const result = await auth.signInWithEmailAndPassword(email, password);
+          currentUser = result.user;
+        } else {
+          const result = await auth.createUserWithEmailAndPassword(email, password);
+          currentUser = result.user;
+          await currentUser.updateProfile({ displayName: name });
+          await db.collection('users').doc(currentUser.uid).set({
+            displayName: name,
+            email: currentUser.email,
+            createdAt: new Date(),
+            lastLogin: new Date()
+          });
+          await currentUser.sendEmailVerification();
+          alert("Please check your email (and spam folder) to verify your account.");
+        }
+      } catch (error) {
+        alert("Error: " + error.message);
+      }
+    });
+
+    // Auth state observer
+    auth.onAuthStateChanged(async (user) => {
+      if (user) {
+        currentUser = user;
+        if (!user.emailVerified) {
+          if (!document.querySelector('.verify-email')) {
+            const verifyDiv = document.createElement('div');
+            verifyDiv.className = 'verify-email';
+            verifyDiv.innerHTML = `
+              Please verify your email. Check your inbox and <strong>spam folder</strong>.
+              <button onclick="currentUser.sendEmailVerification()">Resend</button>
+            `;
+            authUi.appendChild(verifyDiv);
+          }
+          return;
+        }
+
+        userBadge.textContent = user.displayName || user.email;
+        authUi.classList.add('hidden');
+        appUi.classList.remove('hidden');
+        loadChatHistory();
+      } else {
+        appUi.classList.add('hidden');
+        authUi.classList.remove('hidden');
+      }
+    });
+
+    // Logout
+    logoutBtn.addEventListener('click', () => {
+      auth.signOut();
+    });
+
+    // New Chat
+    newChatBtn.addEventListener('click', () => {
+      currentChatId = null;
+      chatMessages.innerHTML = '';
+      addMessage("👋 New chat started. How can I help you?", "bot");
+    });
+
+    // File Upload
+    addFileBtn.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file || !currentUser) return;
+
+      const filePath = `uploads/${currentUser.uid}/${Date.now()}_${file.name}`;
+      const ref = storage.ref().child(filePath);
+
+      try {
+        const snapshot = await ref.put(file);
+        const downloadURL = await snapshot.ref.getDownloadURL();
+        const fileName = file.name;
+        addMessage(`📎 File uploaded: ${fileName}`, "user");
+        addMessage(`I see you uploaded a file: "${fileName}". I can help analyze it.`, "bot");
+      } catch (error) {
+        addMessage(`⚠️ Failed to upload file: ${error.message}`, "bot");
+      }
+      fileInput.value = '';
+    });
+
+    // Send Message
+    async function handleSend() {
+      const text = chatInput.value.trim();
+      if (!text && !fileInput.files.length) return;
+
+      addMessage(text || "📎 Sent a file", "user");
+      chatInput.value = "";
+
+      showTypingIndicator();
+
+      const reply = await askCohere(text);
+      removeTypingIndicator();
+      addMessage(reply, "bot");
+
+      if (currentChatId) {
+        await db.collection('chats').doc(currentChatId).update({
+          messages: firebase.firestore.FieldValue.arrayUnion({
+            sender: 'user',
+            text,
+            timestamp: new Date()
+          })
+        });
+      }
+    }
+
+    sendBtn.addEventListener('click', handleSend);
+    chatInput.addEventListener('keypress', e => {
+      if (e.key === 'Enter') handleSend();
+    });
+
+    function addMessage(text, sender) {
+      const msg = document.createElement("div");
+      msg.classList.add("message", sender);
+      msg.textContent = text;
+
+      const time = document.createElement("div");
+      time.classList.add("message-time");
+      time.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      msg.appendChild(time);
+
+      chatMessages.appendChild(msg);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function showTypingIndicator() {
+      const typingDiv = document.createElement("div");
+      typingDiv.classList.add("typing-indicator");
+      typingDiv.id = "typing-indicator";
+      typingDiv.innerHTML = '<div class="typing-dot"></div>'.repeat(3);
+      chatMessages.appendChild(typingDiv);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function removeTypingIndicator() {
+      const el = document.getElementById("typing-indicator");
+      el?.remove();
+    }
+
+    // Ask Cohere AI
+    async function askCohere(userMessage) {
+      try {
+        const response = await fetch("https://api.cohere.ai/v1/chat", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${COHERE_API_KEY}`
+          },
+          body: JSON.stringify({
+            model: "command-r",
+            message: userMessage
+          })
+        });
+
+        const data = await response.json();
+        return data.text || "Sorry, I couldn't process that.";
+      } catch (err) {
+        console.error("Cohere Error:", err);
+        return "⚠️ AI service is temporarily unavailable.";
+      }
+    }
+
+    // Load Chat History (Placeholder)
+    async function loadChatHistory() {
+      chatHistory.innerHTML = '';
+      const today = document.createElement('div');
+      today.className = 'history-item active';
+      today.textContent = 'Today';
+      chatHistory.appendChild(today);
+    }
+  </script>
+</body>
+</html>
