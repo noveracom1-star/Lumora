@@ -125,6 +125,13 @@
       font-weight: 800;
       color: white;
       box-shadow: var(--shadow-md);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .logo::before {
+      content: "🤖";
+      font-size: 22px;
     }
 
     .brand-text h1 {
@@ -141,7 +148,7 @@
     .header-actions {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 8px;
     }
 
     .header-btn {
@@ -156,6 +163,7 @@
       justify-content: center;
       cursor: pointer;
       transition: var(--transition);
+      font-size: 16px;
     }
 
     .header-btn:hover {
@@ -163,7 +171,7 @@
     }
 
     .logout-btn {
-      padding: 8px 16px;
+      padding: 8px 12px;
       border-radius: 20px;
       border: none;
       background: var(--danger);
@@ -374,6 +382,7 @@
       line-height: 1.5;
       position: relative;
       animation: fadeIn 0.3s ease;
+      cursor: pointer;
     }
 
     @keyframes fadeIn {
@@ -406,6 +415,52 @@
       color: rgba(255, 255, 255, 0.8);
     }
 
+    /* Message options menu */
+    .message-options {
+      position: absolute;
+      background: var(--bg-secondary);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-lg);
+      z-index: 10;
+      display: none;
+      flex-direction: column;
+      padding: 8px;
+      width: 150px;
+    }
+
+    .message-options button {
+      padding: 10px 12px;
+      border: none;
+      background: none;
+      color: var(--text-primary);
+      text-align: left;
+      cursor: pointer;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+    }
+
+    .message-options button:hover {
+      background: var(--bg-tertiary);
+    }
+
+    /* Image container */
+    .image-container {
+      margin-top: 12px;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      max-width: 100%;
+    }
+
+    .image-container img {
+      width: 100%;
+      height: auto;
+      border-radius: var(--radius-md);
+    }
+
     .input-area {
       padding: 16px;
       border-top: 1px solid var(--card-border);
@@ -427,6 +482,7 @@
       justify-content: center;
       cursor: pointer;
       transition: var(--transition);
+      font-size: 18px;
     }
 
     .attachment-btn:hover {
@@ -462,10 +518,119 @@
       justify-content: center;
       cursor: pointer;
       transition: var(--transition);
+      font-size: 18px;
     }
 
     .send-btn:hover {
       transform: scale(1.05);
+    }
+
+    /* Screen containers */
+    .screen {
+      display: none;
+      flex: 1;
+      flex-direction: column;
+      background: var(--card-bg);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--card-border);
+      overflow: hidden;
+      box-shadow: var(--shadow-md);
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    .screen.active {
+      display: flex;
+    }
+
+    .screen-header {
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--card-border);
+    }
+
+    .screen-header h2 {
+      font-size: 22px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .screen-header p {
+      color: var(--text-muted);
+      margin-top: 8px;
+    }
+
+    /* File upload bottom sheet */
+    .upload-sheet {
+      position: fixed;
+      bottom: -300px;
+      left: 0;
+      width: 100%;
+      background: var(--bg-secondary);
+      border-top: 1px solid var(--card-border);
+      border-radius: 20px 20px 0 0;
+      padding: 20px;
+      z-index: 100;
+      transition: var(--transition);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .upload-sheet.open {
+      bottom: 0;
+    }
+
+    .upload-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .upload-header h3 {
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .close-sheet {
+      background: none;
+      border: none;
+      color: var(--text-primary);
+      font-size: 24px;
+      cursor: pointer;
+    }
+
+    .upload-options {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+
+    .upload-option {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      background: var(--card-bg);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--card-border);
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .upload-option:hover {
+      background: var(--bg-tertiary);
+    }
+
+    .upload-option i {
+      font-size: 32px;
+      margin-bottom: 12px;
+    }
+
+    .upload-option span {
+      font-size: 14px;
+      font-weight: 500;
     }
 
     /* Footer */
@@ -551,6 +716,14 @@
         height: 40px;
         border-radius: 50%;
       }
+      
+      .header-actions {
+        gap: 6px;
+      }
+      
+      .upload-options {
+        grid-template-columns: 1fr;
+      }
     }
 
     @media (max-width: 480px) {
@@ -573,6 +746,10 @@
       .chat-input {
         padding: 12px 16px;
       }
+      
+      .screen {
+        padding: 16px;
+      }
     }
   </style>
 </head>
@@ -585,7 +762,7 @@
           <i class="fas fa-bars"></i>
         </button>
         <div class="brand">
-          <div class="logo">L</div>
+          <div class="logo"></div>
           <div class="brand-text">
             <h1>LUMORA</h1>
             <div class="tagline">Advanced AI Assistant</div>
@@ -614,23 +791,23 @@
     <nav class="nav-drawer" id="nav-drawer">
       <div class="drawer-section">
         <h3>Main Navigation</h3>
-        <a href="#" class="nav-item active">
+        <a href="#" class="nav-item active" data-screen="chat-screen">
           <i class="fas fa-comment-dots"></i>
           <span>Chat</span>
         </a>
-        <a href="#" class="nav-item">
+        <a href="#" class="nav-item" data-screen="history-screen">
           <i class="fas fa-history"></i>
           <span>History</span>
         </a>
-        <a href="#" class="nav-item">
+        <a href="#" class="nav-item" data-screen="documents-screen">
           <i class="fas fa-file-alt"></i>
           <span>Documents</span>
         </a>
-        <a href="#" class="nav-item">
+        <a href="#" class="nav-item" data-screen="settings-screen">
           <i class="fas fa-cog"></i>
           <span>Settings</span>
         </a>
-        <a href="#" class="nav-item">
+        <a href="#" class="nav-item" data-screen="help-screen">
           <i class="fas fa-question-circle"></i>
           <span>Help & Support</span>
         </a>
@@ -660,7 +837,8 @@
     
     <!-- Main Content -->
     <main class="main-content" id="main-content">
-      <div class="chat-container">
+      <!-- Chat Screen -->
+      <div class="chat-container screen active" id="chat-screen">
         <div class="chat-header">
           <i class="fas fa-robot"></i>
           <div class="chat-header-text">
@@ -686,11 +864,154 @@
           </button>
         </div>
       </div>
+      
+      <!-- History Screen -->
+      <div class="screen" id="history-screen">
+        <div class="screen-header">
+          <h2><i class="fas fa-history"></i> Chat History</h2>
+          <p>Review your past conversations with LUMORA</p>
+        </div>
+        <div class="history-list" id="history-list">
+          <!-- History items will be populated here -->
+          <div class="history-empty" style="text-align: center; padding: 40px 20px; color: var(--text-muted);">
+            <i class="fas fa-comment-slash" style="font-size: 48px; margin-bottom: 16px;"></i>
+            <h3>No chat history yet</h3>
+            <p>Start a conversation to see your history here</p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Documents Screen -->
+      <div class="screen" id="documents-screen">
+        <div class="screen-header">
+          <h2><i class="fas fa-file-alt"></i> Documents</h2>
+          <p>Manage your uploaded files and documents</p>
+        </div>
+        <div class="documents-list" id="documents-list">
+          <!-- Documents will be populated here -->
+          <div class="documents-empty" style="text-align: center; padding: 40px 20px; color: var(--text-muted);">
+            <i class="fas fa-folder-open" style="font-size: 48px; margin-bottom: 16px;"></i>
+            <h3>No documents uploaded</h3>
+            <p>Upload files to see them here</p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Settings Screen -->
+      <div class="screen" id="settings-screen">
+        <div class="screen-header">
+          <h2><i class="fas fa-cog"></i> Settings</h2>
+          <p>Customize your LUMORA experience</p>
+        </div>
+        <div class="settings-options">
+          <div class="setting-item">
+            <h3>Appearance</h3>
+            <p>Customize the look and feel of the app</p>
+            <div class="setting-control">
+              <button class="control-btn" id="dark-mode-btn">
+                <i class="fas fa-moon"></i>
+                <span>Dark Mode</span>
+              </button>
+            </div>
+          </div>
+          
+          <div class="setting-item">
+            <h3>Notifications</h3>
+            <p>Manage how you receive notifications</p>
+            <div class="setting-control">
+              <label class="switch">
+                <input type="checkbox" checked>
+                <span class="slider"></span>
+              </label>
+              <span>Enable notifications</span>
+            </div>
+          </div>
+          
+          <div class="setting-item">
+            <h3>Privacy</h3>
+            <p>Control your privacy settings</p>
+            <div class="setting-control">
+              <button class="control-btn">
+                <i class="fas fa-shield-alt"></i>
+                <span>Privacy Settings</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Help Screen -->
+      <div class="screen" id="help-screen">
+        <div class="screen-header">
+          <h2><i class="fas fa-question-circle"></i> Help & Support</h2>
+          <p>Get help and learn how to use LUMORA</p>
+        </div>
+        <div class="help-content">
+          <div class="help-section">
+            <h3>Frequently Asked Questions</h3>
+            <div class="faq-item">
+              <h4>How do I start a new chat?</h4>
+              <p>Click the "New Chat" button in the navigation drawer to start a fresh conversation.</p>
+            </div>
+            <div class="faq-item">
+              <h4>Can I upload files?</h4>
+              <p>Yes, click the paperclip icon in the chat to upload images, documents, and other files.</p>
+            </div>
+            <div class="faq-item">
+              <h4>Is my data secure?</h4>
+              <p>Yes, we use industry-standard encryption to protect your data and conversations.</p>
+            </div>
+          </div>
+          
+          <div class="help-section">
+            <h3>Contact Support</h3>
+            <p>If you need further assistance, please contact our support team:</p>
+            <div class="contact-options">
+              <button class="control-btn">
+                <i class="fas fa-envelope"></i>
+                <span>Email Support</span>
+              </button>
+              <button class="control-btn">
+                <i class="fas fa-comments"></i>
+                <span>Live Chat</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </main>
+    
+    <!-- File Upload Bottom Sheet -->
+    <div class="upload-sheet" id="upload-sheet">
+      <div class="upload-header">
+        <h3>Upload File</h3>
+        <button class="close-sheet" id="close-sheet">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="upload-options">
+        <div class="upload-option" data-type="image">
+          <i class="fas fa-image"></i>
+          <span>Photo</span>
+        </div>
+        <div class="upload-option" data-type="video">
+          <i class="fas fa-video"></i>
+          <span>Video</span>
+        </div>
+        <div class="upload-option" data-type="file">
+          <i class="fas fa-file"></i>
+          <span>File</span>
+        </div>
+        <div class="upload-option" data-type="camera">
+          <i class="fas fa-camera"></i>
+          <span>Camera</span>
+        </div>
+      </div>
+    </div>
     
     <!-- Footer -->
     <footer class="app-footer">
-      From AITECH by ANOINTING • Powered by Cohere AI • © 2023–2025 LUMORA
+      From NOVERA powered by AITECH 2025 LUMORA
     </footer>
   </div>
   
@@ -698,6 +1019,26 @@
   <div class="toast" id="toast">
     <i class="fas fa-info-circle"></i>
     <span id="toast-message"></span>
+  </div>
+
+  <!-- Message Options Menu (dynamically positioned) -->
+  <div class="message-options" id="message-options">
+    <button data-action="copy">
+      <i class="fas fa-copy"></i>
+      <span>Copy</span>
+    </button>
+    <button data-action="like">
+      <i class="fas fa-thumbs-up"></i>
+      <span>Like</span>
+    </button>
+    <button data-action="dislike">
+      <i class="fas fa-thumbs-down"></i>
+      <span>Dislike</span>
+    </button>
+    <button data-action="regenerate">
+      <i class="fas fa-redo"></i>
+      <span>Regenerate</span>
+    </button>
   </div>
 
   <script>
@@ -734,9 +1075,17 @@
     const overlay = document.getElementById('overlay');
     const mainContent = document.getElementById('main-content');
     const themeBtn = document.getElementById('theme-btn');
+    const uploadSheet = document.getElementById('upload-sheet');
+    const closeSheet = document.getElementById('close-sheet');
+    const uploadOptions = document.querySelectorAll('.upload-option');
+    const navItems = document.querySelectorAll('.nav-item');
+    const screens = document.querySelectorAll('.screen');
+    const messageOptions = document.getElementById('message-options');
+    const notificationsBtn = document.getElementById('notifications-btn');
 
     let currentChatId = null;
     let isDarkMode = true;
+    let currentMessageContext = null;
 
     // Utility Functions
     function showToast(msg, time = 4000) {
@@ -763,8 +1112,123 @@
     themeBtn.addEventListener('click', () => {
       isDarkMode = !isDarkMode;
       themeBtn.innerHTML = isDarkMode ? '<i class="fas fa-moon"></i>' : '<i class="fas fa-sun"></i>';
-      // Here you would typically toggle a class on the body and update CSS variables
+      document.body.classList.toggle('light-mode', !isDarkMode);
       showToast(isDarkMode ? 'Dark mode activated' : 'Light mode activated');
+    });
+
+    // Navigation
+    navItems.forEach(item => {
+      item.addEventListener('click', (e) => {
+        e.preventDefault();
+        const screenId = item.getAttribute('data-screen');
+        
+        // Update active states
+        navItems.forEach(navItem => navItem.classList.remove('active'));
+        item.classList.add('active');
+        
+        // Show the selected screen
+        screens.forEach(screen => screen.classList.remove('active'));
+        document.getElementById(screenId).classList.add('active');
+        
+        // Close drawer on mobile
+        if (window.innerWidth <= 768) {
+          toggleDrawer();
+        }
+      });
+    });
+
+    // Toggle Upload Sheet
+    uploadBtn.addEventListener('click', () => {
+      uploadSheet.classList.add('open');
+      overlay.classList.add('active');
+    });
+
+    closeSheet.addEventListener('click', () => {
+      uploadSheet.classList.remove('open');
+      overlay.classList.remove('active');
+    });
+
+    overlay.addEventListener('click', () => {
+      uploadSheet.classList.remove('open');
+      overlay.classList.remove('active');
+    });
+
+    // Handle Upload Options
+    uploadOptions.forEach(option => {
+      option.addEventListener('click', () => {
+        const type = option.getAttribute('data-type');
+        const input = document.createElement('input');
+        
+        switch(type) {
+          case 'image':
+            input.type = 'file';
+            input.accept = 'image/*';
+            break;
+          case 'video':
+            input.type = 'file';
+            input.accept = 'video/*';
+            break;
+          case 'file':
+            input.type = 'file';
+            input.accept = '.pdf,.doc,.docx,.txt';
+            break;
+          case 'camera':
+            // This would require getUserMedia API
+            showToast('Camera access not implemented in this demo');
+            return;
+        }
+        
+        input.onchange = async (e) => {
+          const file = e.target.files[0];
+          if (!file) return;
+          
+          showToast(`Uploading ${file.name}...`);
+          
+          try {
+            const ref = storage.ref(`uploads/${auth.currentUser.uid}/${Date.now()}_${file.name}`);
+            const snap = await ref.put(file);
+            const url = await snap.ref.getDownloadURL();
+            
+            // Handle different file types
+            if (file.type.startsWith('image/')) {
+              addMessage(`📷 Image: ${file.name}`, 'user');
+              // Create image container
+              const imageContainer = document.createElement('div');
+              imageContainer.className = 'image-container';
+              imageContainer.innerHTML = `<img src="${url}" alt="${file.name}">`;
+              
+              // Add image to the last user message
+              const userMessages = document.querySelectorAll('.message.user');
+              if (userMessages.length > 0) {
+                userMessages[userMessages.length - 1].appendChild(imageContainer);
+              }
+              
+              addMessage(`I can see your image. How can I help you with it?`, 'bot');
+            } else {
+              addMessage(`📎 Uploaded: ${file.name}`, 'user');
+              addMessage(`I've received your file. How can I help you with "${file.name}"?`, 'bot');
+            }
+            
+            if (currentChatId) {
+              await db.collection('chats').doc(currentChatId).collection('messages').add({
+                text: `Uploaded: ${file.name} - ${url}`,
+                sender: 'user',
+                timestamp: new Date()
+              });
+            }
+            
+            showToast('File uploaded successfully!');
+          } catch (err) {
+            console.error('Upload error:', err);
+            addMessage('❌ Upload failed. Please try again.', 'bot');
+            showToast('Upload failed');
+          }
+        };
+        
+        input.click();
+        uploadSheet.classList.remove('open');
+        overlay.classList.remove('active');
+      });
     });
 
     // Message Functions
@@ -780,9 +1244,89 @@
         <span class="message-time">${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
       `;
       
+      // Add click event for message options
+      el.addEventListener('click', (e) => {
+        if (e.target.tagName !== 'BUTTON' && e.target.tagName !== 'I') {
+          showMessageOptions(el, e);
+        }
+      });
+      
       chatMessages.appendChild(el);
       chatMessages.scrollTop = chatMessages.scrollHeight;
+      return el;
     }
+
+    // Show message options menu
+    function showMessageOptions(messageEl, event) {
+      // Hide any existing options
+      messageOptions.style.display = 'none';
+      
+      // Set current message context
+      currentMessageContext = messageEl;
+      
+      // Position the options menu near the message
+      const rect = messageEl.getBoundingClientRect();
+      messageOptions.style.top = `${rect.top + window.scrollY}px`;
+      
+      if (messageEl.classList.contains('user')) {
+        messageOptions.style.left = `${rect.right - 150}px`;
+      } else {
+        messageOptions.style.left = `${rect.left}px`;
+      }
+      
+      messageOptions.style.display = 'flex';
+      
+      // Add event listener to hide menu when clicking outside
+      const clickHandler = (e) => {
+        if (!messageOptions.contains(e.target) && !messageEl.contains(e.target)) {
+          messageOptions.style.display = 'none';
+          document.removeEventListener('click', clickHandler);
+        }
+      };
+      
+      setTimeout(() => {
+        document.addEventListener('click', clickHandler);
+      }, 10);
+    }
+
+    // Handle message options
+    messageOptions.querySelectorAll('button').forEach(button => {
+      button.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const action = button.getAttribute('data-action');
+        
+        if (!currentMessageContext) return;
+        
+        const messageText = currentMessageContext.querySelector('div').textContent;
+        
+        switch(action) {
+          case 'copy':
+            navigator.clipboard.writeText(messageText)
+              .then(() => showToast('Message copied to clipboard'))
+              .catch(() => showToast('Failed to copy message'));
+            break;
+            
+          case 'like':
+            showToast('You liked this message');
+            break;
+            
+          case 'dislike':
+            showToast('You disliked this message');
+            break;
+            
+          case 'regenerate':
+            if (currentMessageContext.classList.contains('bot')) {
+              showToast('Regenerating response...');
+              // In a real app, you would call the AI API again
+            } else {
+              showToast('Can only regenerate AI responses');
+            }
+            break;
+        }
+        
+        messageOptions.style.display = 'none';
+      });
+    });
 
     // AI Integration
     async function askCohere(message) {
@@ -850,45 +1394,6 @@
     sendBtn.addEventListener('click', handleSend);
     chatInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') handleSend();
-    });
-
-    // File Upload
-    uploadBtn.addEventListener('click', () => {
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.accept = 'image/*,application/pdf,.doc,.docx,.txt';
-      
-      input.onchange = async (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        
-        showToast(`Uploading ${file.name}...`);
-        
-        try {
-          const ref = storage.ref(`uploads/${auth.currentUser.uid}/${Date.now()}_${file.name}`);
-          const snap = await ref.put(file);
-          const url = await snap.ref.getDownloadURL();
-          
-          addMessage(`📎 Uploaded: ${file.name}`, 'user');
-          addMessage(`I've received your file. How can I help you with "${file.name}"?`, 'bot');
-          
-          if (currentChatId) {
-            await db.collection('chats').doc(currentChatId).collection('messages').add({
-              text: `Uploaded: ${file.name} - ${url}`,
-              sender: 'user',
-              timestamp: new Date()
-            });
-          }
-          
-          showToast('File uploaded successfully!');
-        } catch (err) {
-          console.error('Upload error:', err);
-          addMessage('❌ Upload failed. Please try again.', 'bot');
-          showToast('Upload failed');
-        }
-      };
-      
-      input.click();
     });
 
     // Chat History Management
@@ -981,6 +1486,11 @@
       chatMessages.innerHTML = '';
       addMessage("Temporary chat started. Messages won't be saved.", 'bot');
       showToast('Temporary chat started');
+    });
+
+    // Notifications button
+    notificationsBtn.addEventListener('click', () => {
+      showToast('No new notifications');
     });
 
     // Authentication Management
