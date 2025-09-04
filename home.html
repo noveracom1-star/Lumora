@@ -595,6 +595,49 @@
       color: rgba(255, 255, 255, 0.8);
     }
 
+    /* Typing indicator */
+    .typing-indicator {
+      display: flex;
+      align-items: center;
+      padding: 14px;
+      background: var(--bg-secondary);
+      border-radius: 16px;
+      align-self: flex-start;
+      border-bottom-left-radius: 4px;
+      margin-bottom: 12px;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .typing-dot {
+      width: 8px;
+      height: 8px;
+      background-color: var(--text-muted);
+      border-radius: 50%;
+      margin: 0 2px;
+      animation: typingAnimation 1.4s infinite ease-in-out;
+    }
+
+    .typing-dot:nth-child(1) {
+      animation-delay: 0s;
+    }
+
+    .typing-dot:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    .typing-dot:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+
+    @keyframes typingAnimation {
+      0%, 60%, 100% {
+        transform: translateY(0);
+      }
+      30% {
+        transform: translateY(-5px);
+      }
+    }
+
     /* Message options menu */
     .message-options {
       position: absolute;
@@ -639,6 +682,16 @@
       width: 100%;
       height: auto;
       border-radius: var(--radius-md);
+      max-height: 300px;
+      object-fit: contain;
+    }
+
+    .image-link {
+      display: block;
+      margin-top: 6px;
+      font-size: 12px;
+      color: var(--text-muted);
+      word-break: break-all;
     }
 
     .input-area {
@@ -665,6 +718,26 @@
     .chat-input:focus {
       background: var(--card-bg);
       box-shadow: 0 0 0 2px var(--accent-primary);
+    }
+
+    .file-upload-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: none;
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: var(--transition);
+      font-size: 16px;
+    }
+
+    .file-upload-btn:hover {
+      background: var(--accent-primary);
+      color: white;
     }
 
     .send-btn {
@@ -1096,6 +1169,9 @@
         </div>
         
         <div class="input-area">
+          <button class="file-upload-btn" id="file-upload-btn" title="Upload file">
+            <i class="fas fa-paperclip"></i>
+          </button>
           <input type="text" class="chat-input" id="chat-input" placeholder="Type your message here..." />
           <button class="send-btn" id="send-btn">
             <i class="fas fa-paper-plane"></i>
@@ -1292,6 +1368,7 @@
     const notificationsToggle = document.getElementById('notifications-toggle');
     const loadingScreen = document.getElementById('loading-screen');
     const progressFill = document.getElementById('progress-fill');
+    const fileUploadBtn = document.getElementById('file-upload-btn');
 
     let currentChatId = null;
     let isDarkMode = true;
@@ -1390,17 +1467,37 @@
       const el = document.createElement('div');
       el.className = `message ${sender === 'user' ? 'user' : 'bot'}`;
       
+      // Check if message contains image URLs
+      const imageUrlRegex = /(https?:\/\/.*\.(?:png|jpg|jpeg|gif|webp))/gi;
+      const imageUrls = text.match(imageUrlRegex);
+      let displayText = text;
+      let imageHtml = '';
+      
+      if (imageUrls) {
+        // Remove image URLs from the text
+        displayText = text.replace(imageUrlRegex, '');
+        
+        // Create image elements for each image URL
+        imageHtml = imageUrls.map(url => `
+          <div class="image-container">
+            <img src="${url}" alt="AI Generated Image" onerror="this.style.display='none'">
+            <a href="${url}" target="_blank" class="image-link">${url}</a>
+          </div>
+        `).join('');
+      }
+      
       // Format message with line breaks
-      const formattedText = escapeHtml(text).replace(/\n/g, '<br>');
+      const formattedText = escapeHtml(displayText).replace(/\n/g, '<br>');
       
       el.innerHTML = `
         <div>${formattedText}</div>
+        ${imageHtml}
         <span class="message-time">${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
       `;
       
       // Add click event for message options
       el.addEventListener('click', (e) => {
-        if (e.target.tagName !== 'BUTTON' && e.target.tagName !== 'I') {
+        if (e.target.tagName !== 'BUTTON' && e.target.tagName !== 'I' && e.target.tagName !== 'A') {
           showMessageOptions(el, e);
         }
       });
@@ -1408,6 +1505,20 @@
       chatMessages.appendChild(el);
       chatMessages.scrollTop = chatMessages.scrollHeight;
       return el;
+    }
+
+    // Show typing indicator
+    function showTypingIndicator() {
+      const typingEl = document.createElement('div');
+      typingEl.className = 'typing-indicator';
+      typingEl.innerHTML = `
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+      `;
+      chatMessages.appendChild(typingEl);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+      return typingEl;
     }
 
     // Show message options menu
@@ -1511,11 +1622,7 @@
       chatInput.value = '';
       
       // Show typing indicator
-      const typingIndicator = document.createElement('div');
-      typingIndicator.className = 'message bot';
-      typingIndicator.innerHTML = '<em>Thinking…</em><span class="message-time">&nbsp;</span>';
-      chatMessages.appendChild(typingIndicator);
-      chatMessages.scrollTop = chatMessages.scrollHeight;
+      const typingIndicator = showTypingIndicator();
       
       // Get AI response
       const reply = await askCohere(text);
@@ -1548,6 +1655,11 @@
     sendBtn.addEventListener('click', handleSend);
     chatInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') handleSend();
+    });
+
+    // File upload button
+    fileUploadBtn.addEventListener('click', () => {
+      showToast('File upload feature coming soon');
     });
 
     // Chat History Management
